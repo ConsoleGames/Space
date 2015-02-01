@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Space", "Space\Space.csproj", "{920CC96A-7E2A-4609-9490-F78D22FA671D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleEngine", "ConsoleEngine\ConsoleEngine.csproj", "{8D557981-1EB4-44E6-B9C2-0D2F44486BE6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{920CC96A-7E2A-4609-9490-F78D22FA671D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{920CC96A-7E2A-4609-9490-F78D22FA671D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{920CC96A-7E2A-4609-9490-F78D22FA671D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{920CC96A-7E2A-4609-9490-F78D22FA671D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D557981-1EB4-44E6-B9C2-0D2F44486BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D557981-1EB4-44E6-B9C2-0D2F44486BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D557981-1EB4-44E6-B9C2-0D2F44486BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D557981-1EB4-44E6-B9C2-0D2F44486BE6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
