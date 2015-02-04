@@ -26,10 +26,10 @@ namespace Space
             var entityManager = new EntityManager();
             var asteroidCharacter = new CharComponent('O');
             for (var i = 0; i < 30; ++i)
-                entityManager.AddEntity("asteroid" + i, asteroidCharacter, new CoordinateComponent((uint)random.Next(0, Console.WindowWidth - 1), (uint)random.Next(0, Console.WindowHeight - 1)));
+                entityManager.AddEntity("asteroid" + i, new Entity(asteroidCharacter, new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0))));
 
-            entityManager.AddEntity("ship", new CharComponent('>'), new CoordinateComponent(10, 15));
-            var ship = entityManager.Entities["ship"];
+            var ship = new Entity(new CharComponent('>'), new MovementComponent(new Coordinate(10, 15)));
+            entityManager.AddEntity("ship", ship);
 
             var running = true;
             var stopNextTurn = false;
@@ -41,27 +41,21 @@ namespace Space
                     running = false;
 
                 Console.Clear();
+                entityManager.RenderEntities();
+                entityManager.UpdateEntities();
 
                 foreach (var entityEntry in entityManager.Entities)
                 {
-                    var entity = entityEntry.Value;
-                    var coordinates = (CoordinateComponent)entity[typeof(CoordinateComponent)];
-                    Console.SetCursorPosition((int)coordinates.X, (int)coordinates.Y);
-                    Console.Write(((CharComponent)entity[typeof(CharComponent)]).Char);
+                    var movement = entityEntry.Value.GetComponent<MovementComponent>();
 
                     if (entityEntry.Key.StartsWith("asteroid"))
                     {
-                        if (coordinates.X <= 0)
-                        {
-                            coordinates.X = (uint)(Console.WindowWidth - 1);
-                            coordinates.Y = (uint)random.Next(0, Console.WindowHeight - 1);
-                        }
-                        else
-                            --coordinates.X;
+                        if (movement.Position.X <= 0)
+                            movement.Position = new Coordinate(Console.WindowWidth - 1, random.Next(0, Console.WindowHeight - 1));
 
-                        if (coordinates == (CoordinateComponent)ship[typeof(CoordinateComponent)])
+                        if (movement.Position == ship.GetComponent<MovementComponent>().Position)
                         {
-                            ((CharComponent)ship[typeof(CharComponent)]).Char = '#';
+                            ship.GetComponent<CharComponent>().Char = '#';
                             stopNextTurn = true;
                         }
                     }
@@ -76,17 +70,17 @@ namespace Space
                 if (running && !stopNextTurn && Console.KeyAvailable)
                 {
                     var key = Console.ReadKey();
-                    var shipCoord = (CoordinateComponent)ship[typeof(CoordinateComponent)];
+                    var shipMovement = ship.GetComponent<MovementComponent>();
                     switch (key.Key)
                     {
                         case ConsoleKey.UpArrow:
-                            if (shipCoord.Y > 0)
-                                --shipCoord.Y;
+                            if (shipMovement.Position.Y > 0)
+                                shipMovement.Position = new Coordinate(shipMovement.Position.X, shipMovement.Position.Y - 1);
                             break;
 
                         case ConsoleKey.DownArrow:
-                            if (shipCoord.Y < Console.WindowHeight - 2)
-                                ++shipCoord.Y;
+                            if (shipMovement.Position.Y < Console.WindowHeight - 2)
+                                shipMovement.Position = new Coordinate(shipMovement.Position.X, shipMovement.Position.Y + 1);
                             break;
                     }
                 }

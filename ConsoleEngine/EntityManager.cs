@@ -8,48 +8,34 @@ namespace ConsoleEngine
 {
     public class EntityManager
     {
-        public Dictionary<string, Dictionary<Type, Component>> Entities { get; private set; }
+        public readonly Dictionary<string, Entity> Entities = new Dictionary<string, Entity>();
 
-        public EntityManager()
-        {
-            Entities = new Dictionary<string, Dictionary<Type, Component>>();
-        }
-
-        public void AddEntity(string name, params Component[] components)
+        public void AddEntity(string name, Entity entity)
         {
             if (Entities.ContainsKey(name))
-                throw new ArgumentException("Entity already exists!", "name");
+                throw new ArgumentException("Entity [" + name + "] already exists!", "name");
 
-            Entities.Add(name, components.ToDictionary(component => component.GetType()));
+            Entities.Add(name, entity);
         }
 
-        public void AddComponentsToEntity(string name, params Component[] components)
+        public Entity GetEntity(string name)
         {
             if (!Entities.ContainsKey(name))
-                throw new ArgumentException("Entity doesn't exist!", "name");
+                throw new KeyNotFoundException("Entity [" + name + "] doesn't exist!");
 
-            var entity = Entities[name];
-            foreach (var component in components)
-            {
-                var type = component.GetType();
-                if (entity.ContainsKey(type))
-                    throw new Exception("Entity already contains component [" + type.FullName + "]!");
-
-                entity.Add(type, component);
-            }
+            return Entities[name];
         }
 
-        public TComponent GetComponentForEntity<TComponent>(string name) where TComponent : Component
+        public void UpdateEntities()
         {
-            if (!Entities.ContainsKey(name))
-                throw new ArgumentException("Entity doesn't exist!", "name");
+            foreach (var entity in Entities.Values)
+                entity.Update();
+        }
 
-            var entity = Entities[name];
-
-            if (!entity.ContainsKey(typeof(TComponent)))
-                throw new Exception("Entity doesn't have Component!");
-
-            return (TComponent)entity[typeof(TComponent)];
+        public void RenderEntities()
+        {
+            foreach (var entity in Entities.Values)
+                entity.Render();
         }
     }
 }
