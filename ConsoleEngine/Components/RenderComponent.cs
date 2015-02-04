@@ -8,21 +8,21 @@ namespace ConsoleEngine.Components
 {
     public class RenderComponent : Component
     {
-        private Entity entity;
+        private Entity target;
 
         public override void Setup(Entity entity)
         {
-            this.entity = entity;
+            target = entity;
         }
 
         public override void Update()
         {
-            if (!entity.HasComponent<MovementComponent>() || !entity.HasComponent<CharComponent>())
+            if (!target.HasComponent<MovementComponent>() || !target.HasComponent<CharComponent>())
                 return;
 
-            var movement = entity.GetComponent<MovementComponent>();
+            var movement = target.GetComponent<MovementComponent>();
             Console.SetCursorPosition(movement.Position.X, movement.Position.Y);
-            Console.Write(entity.GetComponent<CharComponent>().Char);
+            Console.Write(target.GetComponent<CharComponent>().Char);
         }
     }
 }

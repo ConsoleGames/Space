@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\BoundsCheckComponent.cs" />
     <Compile Include="Components\CharComponent.cs" />
     <Compile Include="Components\CollisionComponent.cs" />
     <Compile Include="Components\MovementComponent.cs" />

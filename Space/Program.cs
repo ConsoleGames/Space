@@ -17,22 +17,31 @@ namespace Space
 
         private static void Main(string[] args)
         {
-            Console.WriteLine(Console.LargestWindowWidth + " / " + Console.LargestWindowHeight);
-            Console.WriteLine(Console.WindowWidth + " / " + Console.WindowHeight);
-
-            Console.SetCursorPosition(10, 10);
-            Console.Write("10/10");
-
             Console.CursorVisible = false;
 
             var entityManager = new EntityManager();
+
             var asteroidCharacter = new CharComponent('O');
 
             var asteroids = new Entity[30];
             for (var i = 0; i < 30; ++i)
-                asteroids[i] = new Entity(asteroidCharacter, new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)), new RenderComponent());
+                asteroids[i] = new Entity(asteroidCharacter,
+                    new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)),
+                    new BoundsCheckComponent<MovementComponent>(movement =>
+                        {
+                            if (movement.Position.X <= 0)
+                                movement.Position = new Coordinate(Console.WindowWidth - 1, random.Next(0, Console.WindowHeight - 1));
+                        }),
+                    new RenderComponent());
 
-            var ship = new Entity(new CharComponent('>'), new MovementComponent(new Coordinate(10, 15)), new CollisionComponent((target, check) => { target.GetComponent<CharComponent>().Char = '#'; running = false; }, asteroids), new RenderComponent());
+            var ship = new Entity(new CharComponent('>'),
+                new MovementComponent(new Coordinate(10, 15)),
+                new CollisionComponent((target, check) =>
+                    {
+                        target.GetComponent<CharComponent>().Char = '#';
+                        running = false;
+                    }, asteroids),
+                new RenderComponent());
 
             entityManager.AddEntity("asteroid", asteroids); //Will be named asteroid0 to asteroid29
             entityManager.AddEntity("ship", ship);
@@ -42,18 +51,6 @@ namespace Space
             var delay = 30f;
             while (running)
             {
-                var pretendShipPosition = new Coordinate(ship.GetComponent<MovementComponent>().Position, deltaX: 1);
-                foreach (var entityEntry in entityManager.Entities)
-                {
-                    var movement = entityEntry.Value.GetComponent<MovementComponent>();
-
-                    if (entityEntry.Key.StartsWith("asteroid"))
-                    {
-                        if (movement.Position.X <= 0)
-                            movement.Position = new Coordinate(Console.WindowWidth - 1, random.Next(0, Console.WindowHeight - 1));
-                    }
-                }
-
                 Console.Clear();
                 entityManager.UpdateEntities();
 

@@ -49,7 +49,7 @@ namespace ConsoleEngine
 
         public override string ToString()
         {
-            return "Velocity: " + X + "/" + Y;
+            return "Coordinates: " + X + "/" + Y;
         }
 
         public static bool operator ==(Coordinate left, Coordinate right)
