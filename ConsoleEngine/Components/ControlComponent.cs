@@ -25,8 +25,7 @@ namespace ConsoleEngine.Components
 
         public override void Update()
         {
-            while (controlOptionsProvider.CanGetControlOptions)
-                controls[controlOptionsProvider.GetControlOption()](target);
+            controls[controlOptionsProvider.GetControlOption()](target);
         }
     }
 }

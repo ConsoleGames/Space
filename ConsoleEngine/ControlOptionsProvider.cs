@@ -7,8 +7,6 @@ namespace ConsoleEngine
 {
     public abstract class ControlOptionsProvider<TControlOption>
     {
-        public abstract bool CanGetControlOptions { get; }
-
         public abstract TControlOption GetControlOption();
     }
 }
