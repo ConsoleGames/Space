@@ -26,6 +26,12 @@ namespace ConsoleEngine
             return Entities[name];
         }
 
+        public void AddEntity(string name, params Entity[] entities)
+        {
+            for (var i = 0; i < entities.Length; ++i)
+                AddEntity(name + i, entities[i]);
+        }
+
         public void UpdateEntities()
         {
             foreach (var entity in Entities.Values)
