@@ -13,6 +13,8 @@ namespace Space
     {
         private static Random random = new Random();
 
+        private static bool running;
+
         private static void Main(string[] args)
         {
             Console.WriteLine(Console.LargestWindowWidth + " / " + Console.LargestWindowHeight);
@@ -25,13 +27,17 @@ namespace Space
 
             var entityManager = new EntityManager();
             var asteroidCharacter = new CharComponent('O');
-            for (var i = 0; i < 30; ++i)
-                entityManager.AddEntity("asteroid" + i, new Entity(asteroidCharacter, new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)), new RenderComponent()));
 
-            var ship = new Entity(new CharComponent('>'), new MovementComponent(new Coordinate(10, 15)), new RenderComponent());
+            var asteroids = new Entity[30];
+            for (var i = 0; i < 30; ++i)
+                asteroids[i] = new Entity(asteroidCharacter, new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)), new RenderComponent());
+
+            var ship = new Entity(new CharComponent('>'), new MovementComponent(new Coordinate(10, 15)), new CollisionComponent((target, check) => { target.GetComponent<CharComponent>().Char = '#'; running = false; }, asteroids), new RenderComponent());
+
+            entityManager.AddEntity("asteroid", asteroids); //Will be named asteroid0 to asteroid29
             entityManager.AddEntity("ship", ship);
 
-            var running = true;
+            running = true;
             var firstRun = true;
             var delay = 30f;
             while (running)
@@ -45,12 +51,6 @@ namespace Space
                     {
                         if (movement.Position.X <= 0)
                             movement.Position = new Coordinate(Console.WindowWidth - 1, random.Next(0, Console.WindowHeight - 1));
-
-                        if (movement.Position == pretendShipPosition)
-                        {
-                            ship.GetComponent<CharComponent>().Char = '#';
-                            running = false;
-                        }
                     }
                 }
 
