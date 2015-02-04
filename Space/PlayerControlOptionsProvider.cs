@@ -7,28 +7,23 @@ using System.Threading.Tasks;
 
 namespace Space
 {
-    internal class PlayerControlOptionsProvider : ControlOptionsProvider<PlayerControlOptions>
+    internal class PlayerControlOptionsProvider : ControlOptionsProvider<ShipControlOptions>
     {
-        public override bool CanGetControlOptions
+        public override ShipControlOptions GetControlOption()
         {
-            get { return Console.KeyAvailable; }
-        }
-
-        public override PlayerControlOptions GetControlOption()
-        {
-            if (!CanGetControlOptions)
-                return PlayerControlOptions.None;
+            if (!Console.KeyAvailable)
+                return ShipControlOptions.None;
 
             switch (Console.ReadKey().Key)
             {
                 case ConsoleKey.UpArrow:
-                    return PlayerControlOptions.Up;
+                    return ShipControlOptions.Up;
 
                 case ConsoleKey.DownArrow:
-                    return PlayerControlOptions.Down;
+                    return ShipControlOptions.Down;
 
                 default:
-                    return PlayerControlOptions.None;
+                    return ShipControlOptions.None;
             }
         }
     }

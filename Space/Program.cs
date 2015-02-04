@@ -17,14 +17,17 @@ namespace Space
 
         private static void Main(string[] args)
         {
+            Console.WriteLine(Console.WindowWidth + " " + Console.WindowHeight);
+            Console.ReadLine();
+
             Console.CursorVisible = false;
 
             var entityManager = new EntityManager();
 
             var asteroidCharacter = new CharComponent('O');
 
-            var asteroids = new Entity[30];
-            for (var i = 0; i < 30; ++i)
+            var asteroids = new Entity[(Console.WindowWidth * Console.WindowHeight) / 60];
+            for (var i = 0; i < asteroids.Length; ++i)
                 asteroids[i] = new Entity(asteroidCharacter,
                     new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)),
                     new BoundsCheckComponent<MovementComponent>(movement =>
@@ -35,28 +38,23 @@ namespace Space
                     new RenderComponent());
 
             var ship = new Entity(new CharComponent('>'),
-                new MovementComponent(new Coordinate(10, 15)),
-                new CollisionComponent((target, check) =>
+                new MovementComponent(new Coordinate(10, Console.WindowHeight / 2)),
+                new ControlComponent<ShipControlOptions>(new Dictionary<ShipControlOptions, Action<Entity>>
                     {
-                        target.GetComponent<CharComponent>().Char = '#';
-                        running = false;
-                    }, asteroids),
-                new ControlComponent<PlayerControlOptions>(new Dictionary<PlayerControlOptions, Action<Entity>>
-                    {
-                        { PlayerControlOptions.None, (_) => {} },
-                        { PlayerControlOptions.Up, target =>
+                        { ShipControlOptions.None, (_) => {} },
+                        { ShipControlOptions.Up, target =>
                             {
                                 var movement = target.GetComponent<MovementComponent>();
                                 movement.Position = new Coordinate(movement.Position, deltaY: -1);
                             }
                         },
-                        { PlayerControlOptions.Down, target =>
+                        { ShipControlOptions.Down, target =>
                             {
                                 var movement = target.GetComponent<MovementComponent>();
                                 movement.Position = new Coordinate(movement.Position, deltaY: 1);
                             }
                         }
-                    }, new PlayerControlOptionsProvider()),
+                    }, new AIControlOptionsProvider()),
                 new BoundsCheckComponent<MovementComponent>(movement =>
                     {
                         if (movement.Position.Y < 0)
@@ -64,6 +62,11 @@ namespace Space
                         else if (movement.Position.Y > Console.WindowHeight - 2)
                             movement.Position = new Coordinate(movement.Position.X, Console.WindowHeight - 2);
                     }),
+                new CollisionComponent((target, check) =>
+                    {
+                        target.GetComponent<CharComponent>().Char = '#';
+                        running = false;
+                    }, asteroids),
                 new RenderComponent());
 
             entityManager.AddEntity("asteroid", asteroids); //Will be named asteroid0 to asteroid29

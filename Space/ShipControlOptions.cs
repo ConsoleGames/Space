@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Space
 {
-    internal enum PlayerControlOptions
+    internal enum ShipControlOptions
     {
         None,
         Up,
