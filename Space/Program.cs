@@ -17,16 +17,12 @@ namespace Space
 
         private static void Main(string[] args)
         {
-            Console.WriteLine(Console.WindowWidth + " " + Console.WindowHeight);
-            Console.ReadLine();
-
             Console.CursorVisible = false;
 
             var entityManager = new EntityManager();
 
-            var asteroidCharacter = new CharComponent('O');
-
             var asteroids = new Entity[(Console.WindowWidth * Console.WindowHeight) / 60];
+            var asteroidCharacter = new CharComponent('O');
             for (var i = 0; i < asteroids.Length; ++i)
                 asteroids[i] = new Entity(asteroidCharacter,
                     new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)),
@@ -54,7 +50,7 @@ namespace Space
                                 movement.Position = new Coordinate(movement.Position, deltaY: 1);
                             }
                         }
-                    }, new AIControlOptionsProvider()),
+                    }, new PlayerControlOptionsProvider()),
                 new BoundsCheckComponent<MovementComponent>(movement =>
                     {
                         if (movement.Position.Y < 0)
