@@ -41,6 +41,29 @@ namespace Space
                         target.GetComponent<CharComponent>().Char = '#';
                         running = false;
                     }, asteroids),
+                new ControlComponent<PlayerControlOptions>(new Dictionary<PlayerControlOptions, Action<Entity>>
+                    {
+                        { PlayerControlOptions.None, (_) => {} },
+                        { PlayerControlOptions.Up, target =>
+                            {
+                                var movement = target.GetComponent<MovementComponent>();
+                                movement.Position = new Coordinate(movement.Position, deltaY: -1);
+                            }
+                        },
+                        { PlayerControlOptions.Down, target =>
+                            {
+                                var movement = target.GetComponent<MovementComponent>();
+                                movement.Position = new Coordinate(movement.Position, deltaY: 1);
+                            }
+                        }
+                    }, new PlayerControlOptionsProvider()),
+                new BoundsCheckComponent<MovementComponent>(movement =>
+                    {
+                        if (movement.Position.Y < 0)
+                            movement.Position = new Coordinate(movement.Position.X, 0);
+                        else if (movement.Position.Y > Console.WindowHeight - 2)
+                            movement.Position = new Coordinate(movement.Position.X, Console.WindowHeight - 2);
+                    }),
                 new RenderComponent());
 
             entityManager.AddEntity("asteroid", asteroids); //Will be named asteroid0 to asteroid29
@@ -58,24 +81,6 @@ namespace Space
                 {
                     Thread.Sleep(1000);
                     firstRun = false;
-                }
-
-                if (running && Console.KeyAvailable)
-                {
-                    var key = Console.ReadKey();
-                    var shipMovement = ship.GetComponent<MovementComponent>();
-                    switch (key.Key)
-                    {
-                        case ConsoleKey.UpArrow:
-                            if (shipMovement.Position.Y > 0)
-                                shipMovement.Position = new Coordinate(shipMovement.Position.X, shipMovement.Position.Y - 1);
-                            break;
-
-                        case ConsoleKey.DownArrow:
-                            if (shipMovement.Position.Y < Console.WindowHeight - 2)
-                                shipMovement.Position = new Coordinate(shipMovement.Position.X, shipMovement.Position.Y + 1);
-                            break;
-                    }
                 }
 
                 Thread.Sleep((int)delay);
