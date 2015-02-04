@@ -26,6 +26,11 @@ namespace ConsoleEngine
             return (TComponent)components[componentType];
         }
 
+        public bool HasComponent<TComponent>() where TComponent : Component
+        {
+            return components.ContainsKey(typeof(TComponent));
+        }
+
         public void AddComponents(params Component[] components)
         {
             foreach (var component in components)
@@ -35,6 +40,7 @@ namespace ConsoleEngine
                 if (this.components.ContainsKey(componentType))
                     throw new ArgumentException("Entity already has this component!", "component");
 
+                component.Setup(this);
                 this.components.Add(componentType, component);
             }
         }
@@ -43,16 +49,6 @@ namespace ConsoleEngine
         {
             foreach (var component in components.Values)
                 component.Update();
-        }
-
-        public void Render()
-        {
-            if (!components.ContainsKey(typeof(MovementComponent)) || !components.ContainsKey(typeof(CharComponent)))
-                return;
-
-            var movement = (MovementComponent)components[typeof(MovementComponent)];
-            Console.SetCursorPosition(movement.Position.X, movement.Position.Y);
-            Console.Write(((CharComponent)components[typeof(CharComponent)]).Char);
         }
     }
 }

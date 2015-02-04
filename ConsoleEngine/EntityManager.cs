@@ -31,11 +31,5 @@ namespace ConsoleEngine
             foreach (var entity in Entities.Values)
                 entity.Update();
         }
-
-        public void RenderEntities()
-        {
-            foreach (var entity in Entities.Values)
-                entity.Render();
-        }
     }
 }

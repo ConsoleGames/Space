@@ -11,7 +11,7 @@ namespace ConsoleEngine
         public virtual void Update()
         { }
 
-        public virtual void Setup()
+        public virtual void Setup(Entity entity)
         { }
     }
 }

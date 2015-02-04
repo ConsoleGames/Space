@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Components\CharComponent.cs" />
     <Compile Include="Components\MovementComponent.cs" />
+    <Compile Include="Components\RenderComponent.cs" />
     <Compile Include="Coordinate.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EntityManager.cs" />

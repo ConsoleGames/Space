@@ -26,24 +26,17 @@ namespace Space
             var entityManager = new EntityManager();
             var asteroidCharacter = new CharComponent('O');
             for (var i = 0; i < 30; ++i)
-                entityManager.AddEntity("asteroid" + i, new Entity(asteroidCharacter, new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0))));
+                entityManager.AddEntity("asteroid" + i, new Entity(asteroidCharacter, new MovementComponent(new Coordinate(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Velocity(-1, 0)), new RenderComponent()));
 
-            var ship = new Entity(new CharComponent('>'), new MovementComponent(new Coordinate(10, 15)));
+            var ship = new Entity(new CharComponent('>'), new MovementComponent(new Coordinate(10, 15)), new RenderComponent());
             entityManager.AddEntity("ship", ship);
 
             var running = true;
-            var stopNextTurn = false;
             var firstRun = true;
             var delay = 30f;
             while (running)
             {
-                if (stopNextTurn)
-                    running = false;
-
-                Console.Clear();
-                entityManager.RenderEntities();
-                entityManager.UpdateEntities();
-
+                var pretendShipPosition = new Coordinate(ship.GetComponent<MovementComponent>().Position, deltaX: 1);
                 foreach (var entityEntry in entityManager.Entities)
                 {
                     var movement = entityEntry.Value.GetComponent<MovementComponent>();
@@ -53,13 +46,16 @@ namespace Space
                         if (movement.Position.X <= 0)
                             movement.Position = new Coordinate(Console.WindowWidth - 1, random.Next(0, Console.WindowHeight - 1));
 
-                        if (movement.Position == ship.GetComponent<MovementComponent>().Position)
+                        if (movement.Position == pretendShipPosition)
                         {
                             ship.GetComponent<CharComponent>().Char = '#';
-                            stopNextTurn = true;
+                            running = false;
                         }
                     }
                 }
+
+                Console.Clear();
+                entityManager.UpdateEntities();
 
                 if (firstRun)
                 {
@@ -67,7 +63,7 @@ namespace Space
                     firstRun = false;
                 }
 
-                if (running && !stopNextTurn && Console.KeyAvailable)
+                if (running && Console.KeyAvailable)
                 {
                     var key = Console.ReadKey();
                     var shipMovement = ship.GetComponent<MovementComponent>();

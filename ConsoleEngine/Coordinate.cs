@@ -18,6 +18,12 @@ namespace ConsoleEngine
             Y = y;
         }
 
+        public Coordinate(Coordinate old, int deltaX = 0, int deltaY = 0)
+        {
+            X = old.X + deltaX;
+            Y = old.Y + deltaY;
+        }
+
         public override bool Equals(object obj)
         {
             if (!(obj is Coordinate))
@@ -38,7 +44,7 @@ namespace ConsoleEngine
 
         public static Coordinate operator +(Coordinate left, Velocity right)
         {
-            return new Coordinate(left.X + right.X, left.Y + right.Y);
+            return new Coordinate(left, deltaX: right.X, deltaY: right.Y);
         }
 
         public override string ToString()
