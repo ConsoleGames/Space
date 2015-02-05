@@ -11,14 +11,14 @@ namespace ConsoleEngine.Components
         private Entity targetEntity;
         private readonly Entity[] checks;
 
-        private readonly Action<Entity, Entity> hitTarget;
+        private readonly Action<Entity, Entity, Vector2> hitTarget;
 
         /// <summary>
         ///
         /// </summary>
-        /// <param name="hitTarget">First parameter is the target Entity, second the Entity being checked.</param>
+        /// <param name="hitTarget">First parameter is the target Entity, second the Entity being checked, third the position where they collided.</param>
         /// <param name="targets"></param>
-        public CollisionComponent(Action<Entity, Entity> hitTarget, params Entity[] targets)
+        public CollisionComponent(Action<Entity, Entity, Vector2> hitTarget, params Entity[] targets)
         {
             this.hitTarget = hitTarget;
             this.checks = targets;
@@ -34,14 +34,15 @@ namespace ConsoleEngine.Components
             if (!targetEntity.HasComponent<MovementComponent>())
                 return;
 
-            var entityPosition = targetEntity.GetComponent<MovementComponent>().Position;
-            foreach (var target in checks)
+            var entityMovement = targetEntity.GetComponent<MovementComponent>();
+            foreach (var check in checks)
             {
-                if (!target.HasComponent<MovementComponent>())
+                if (!check.HasComponent<MovementComponent>())
                     continue;
 
-                if (entityPosition == target.GetComponent<MovementComponent>().Position)
-                    hitTarget(targetEntity, target);
+                Vector2 solution = new Vector2(-1, -1);
+                if (MovementComponent.HaveCollided(entityMovement, check.GetComponent<MovementComponent>(), ref solution))
+                    hitTarget(targetEntity, check, solution);
             }
         }
     }
