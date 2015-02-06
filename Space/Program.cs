@@ -20,7 +20,7 @@ namespace Space
             Console.CursorVisible = false;
             Console.Title = "Awesome Space Game!";
 
-            Console.WindowWidth = 200;
+            Console.WindowWidth = 130;
 
             while (true)
             {
