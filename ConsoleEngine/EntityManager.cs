@@ -8,33 +8,22 @@ namespace ConsoleEngine
 {
     public class EntityManager
     {
-        public readonly Dictionary<string, Entity> Entities = new Dictionary<string, Entity>();
+        public readonly List<Entity> Entities = new List<Entity>();
 
-        public void AddEntity(string name, Entity entity)
+        public void AddEntity(params Entity[] entities)
         {
-            if (Entities.ContainsKey(name))
-                throw new ArgumentException("Entity [" + name + "] already exists!", "name");
+            foreach (var entity in entities)
+            {
+                if (Entities.Contains(entity))
+                    continue;
 
-            Entities.Add(name, entity);
-        }
-
-        public Entity GetEntity(string name)
-        {
-            if (!Entities.ContainsKey(name))
-                throw new KeyNotFoundException("Entity [" + name + "] doesn't exist!");
-
-            return Entities[name];
-        }
-
-        public void AddEntity(string name, params Entity[] entities)
-        {
-            for (var i = 0; i < entities.Length; ++i)
-                AddEntity(name + i, entities[i]);
+                Entities.Add(entity);
+            }
         }
 
         public void UpdateEntities()
         {
-            foreach (var entity in Entities.Values)
+            foreach (var entity in Entities)
                 entity.Update();
         }
     }
