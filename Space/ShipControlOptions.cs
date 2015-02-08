@@ -9,6 +9,7 @@ namespace Space
     {
         None,
         Up,
-        Down
+        Down,
+        Shoot
     }
 }

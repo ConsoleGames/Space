@@ -13,8 +13,8 @@ namespace Space
 
         public override ShipControlOptions GetControlOption()
         {
-            var rand = random.Next(0, 10);
-            return (ShipControlOptions)(rand > 2 ? 0 : rand);
+            var rand = random.Next(0, 15);
+            return (ShipControlOptions)(rand > 3 ? 0 : rand);
         }
     }
 }
