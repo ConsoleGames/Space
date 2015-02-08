@@ -13,6 +13,9 @@ namespace Space
     {
         private static Random random = new Random();
 
+        private static readonly EntityManager entityManager = new EntityManager();
+        private static readonly CharComponent asteroidCharacter = new CharComponent('O');
+
         private static bool running;
 
         private static void Main(string[] args)
@@ -24,67 +27,52 @@ namespace Space
 
             while (true)
             {
-                var entityManager = new EntityManager();
+                var asteroids = (Console.WindowWidth * Console.WindowHeight) / 60;
 
-                var asteroids = new Entity[(Console.WindowWidth * Console.WindowHeight) / 60];
-                var asteroidCharacter = new CharComponent('O');
-                Func<IEnumerable<Entity>> getAsteroids = () => entityManager.Entities.Where(entity => entity.HasComponent<CharComponent>() && entity.GetComponent<CharComponent>() == asteroidCharacter);
-                for (var i = 0; i < asteroids.Length; ++i)
-                {
-                    var speed = random.Next(-5, 0);
-                    asteroids[i] = new Entity(asteroidCharacter,
-                        new MovementComponent(new Vector2(random.Next(0, Console.WindowWidth - 1), random.Next(0, Console.WindowHeight - 1)), new Vector2(speed < -2 ? -1 : speed, 0)),
-                        new BoundsCheckComponent<MovementComponent>(movement =>
-                        {
-                            if (movement.Position.X <= 0)
-                                movement.Position = new Vector2(Console.WindowWidth - 1, random.Next(0, Console.WindowHeight - 1));
-                        }),
-                        new RenderComponent());
-                }
+                for (var i = 0; i < asteroids; ++i)
+                    entityManager.AddEntities(makeAsteroid(new LineSegment(new Vector2(0, 0), new Vector2(Console.WindowWidth, Console.WindowHeight - 1))));
 
-                var ship = new Entity(new CharComponent('>'),
-                    new MovementComponent(new Vector2(Console.WindowWidth / 8, Console.WindowHeight / 2)),
+                entityManager.AddEntities(new Entity(new CharComponent('>'),
                     new ControlComponent<ShipControlOptions>(new Dictionary<ShipControlOptions, Action<Entity>>
                     {
-                        { ShipControlOptions.None, (_) => {} },
-                        { ShipControlOptions.Up, target => target.GetComponent<MovementComponent>().Move(y: -1) },
-                        { ShipControlOptions.Down, target => target.GetComponent<MovementComponent>().Move(y: 1) },
+                        { ShipControlOptions.None, (ship) => ship.GetComponent<MovementComponent>().Velocity = new Vector2(0, 0) },
+                        { ShipControlOptions.Up, ship => ship.GetComponent<MovementComponent>().Velocity = new Vector2(0, -1) },
+                        { ShipControlOptions.Down, ship => ship.GetComponent<MovementComponent>().Velocity = new Vector2(0, 1) },
                         { ShipControlOptions.Shoot, target =>
                             {
-                                var shot = new Entity();
-                                shot.AddComponents(new CharComponent('~'),
-                                    new MovementComponent(new Vector2(target.GetComponent<MovementComponent>().Position, deltaX: 1), new Vector2(1, 0)),
-                                    new BoundsCheckComponent<MovementComponent>(movement =>
+                                entityManager.AddEntities(new Entity(new CharComponent('~'),
+                                    new BoundsCheckComponent<MovementComponent>((shot, movement) =>
                                         {
-                                            if (movement.Position.X >= Console.WindowWidth - 1)
+                                            if (movement.NextPosition.X >= Console.WindowWidth - 1)
                                             {
-                                                shot.GetComponent<MovementComponent>().Move(x: Console.WindowWidth - movement.Position.X - 1);
+                                                movement.Velocity = new Vector2(Console.WindowWidth - movement.Position.X - 1, movement.Velocity.Y);
                                                 entityManager.RemoveEntities(shot);
                                             }
                                         }),
-                                    new CollisionComponent((collisionTarget, check, position) => entityManager.RemoveEntities(collisionTarget, check), getAsteroids),
-                                    new RenderComponent());
-
-                                entityManager.AddEntities(shot);
+                                    new MovementComponent(new Vector2(target.GetComponent<MovementComponent>().Position, deltaX: 1), new Vector2(1, 0)),
+                                    new CollisionComponent((shot, check, position) =>
+                                        {
+                                            entityManager.RemoveEntities(shot);
+                                            replaceAsteroid(check);
+                                        }, getAsteroids),
+                                    new RenderComponent()));
                             }}
-                    }, new AIControlOptionsProvider()),
-                    new BoundsCheckComponent<MovementComponent>(movement =>
+                    }, new PlayerControlOptionsProvider()),
+                    new BoundsCheckComponent<MovementComponent>((ship, movement) =>
                         {
-                            if (movement.Position.Y < 0)
-                                movement.Move(y: -movement.Position.Y);
-                            else if (movement.Position.Y > Console.WindowHeight - 2)
-                                movement.Move(y: Console.WindowHeight - 2 - movement.Position.Y);
+                            if (movement.NextPosition.Y < 0)
+                                movement.Velocity = new Vector2(movement.Velocity.X, movement.Velocity.Y - movement.NextPosition.Y);
+                            else if (movement.NextPosition.Y > Console.WindowHeight - 2)
+                                movement.Velocity = new Vector2(movement.Velocity.X, Console.WindowHeight - movement.Position.Y - 2);
                         }),
+                    new MovementComponent(new Vector2(Console.WindowWidth / 8, Console.WindowHeight / 2)),
                     new CollisionComponent((target, check, position) =>
                         {
-                            target.GetComponent<MovementComponent>().Position = check.GetComponent<MovementComponent>().Position;
+                            target.GetComponent<MovementComponent>().Position = position;
                             target.GetComponent<CharComponent>().Char = '#';
                             running = false;
                         }, getAsteroids),
-                    new RenderComponent());
-
-                entityManager.AddEntities(asteroids);
-                entityManager.AddEntities(ship);
+                    new RenderComponent()));
 
                 running = true;
                 var firstRun = true;
@@ -109,6 +97,7 @@ namespace Space
 
                 Thread.Sleep(1000);
 
+                entityManager.ClearEntities();
                 Console.Clear();
                 Console.WriteLine("Final delay:" + (int)delay);
 
@@ -116,6 +105,33 @@ namespace Space
 
                 Thread.Sleep(1000);
             }
+        }
+
+        private static Entity makeAsteroid(LineSegment spawnArea)
+        {
+            var speed = random.Next(-5, 0);
+            return new Entity(asteroidCharacter,
+                new BoundsCheckComponent<MovementComponent>((asteroid, movement) =>
+                {
+                    if (movement.NextPosition.X <= 0)
+                    {
+                        movement.Velocity = new Vector2(movement.Velocity.X - movement.NextPosition.X, movement.Velocity.Y);
+                        replaceAsteroid(asteroid);
+                    }
+                }),
+                new MovementComponent(new Vector2(random.Next(spawnArea.Start.X, spawnArea.End.X), random.Next(spawnArea.Start.Y, spawnArea.End.Y)), new Vector2(speed < -2 ? -1 : speed, 0)),
+                new RenderComponent());
+        }
+
+        private static void replaceAsteroid(Entity asteroid)
+        {
+            entityManager.RemoveEntities(asteroid);
+            entityManager.AddEntities(makeAsteroid(new LineSegment(new Vector2(Console.WindowWidth - 1, 0), new Vector2(1, Console.WindowHeight - 2))));
+        }
+
+        private static IEnumerable<Entity> getAsteroids()
+        {
+            return entityManager.Entities.Where(entity => entity.HasComponent<CharComponent>() && entity.GetComponent<CharComponent>() == asteroidCharacter);
         }
     }
 }
