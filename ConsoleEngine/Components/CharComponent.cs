@@ -34,7 +34,7 @@ namespace ConsoleEngine.Components
 
         public static bool operator ==(CharComponent left, CharComponent right)
         {
-            return left != null && left.Equals(right);
+            return !object.ReferenceEquals(left, null) && left.Equals(right);
         }
 
         public static bool operator !=(CharComponent left, CharComponent right)

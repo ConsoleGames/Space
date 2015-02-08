@@ -28,6 +28,7 @@ namespace Space
 
                 var asteroids = new Entity[(Console.WindowWidth * Console.WindowHeight) / 60];
                 var asteroidCharacter = new CharComponent('O');
+                Func<IEnumerable<Entity>> getAsteroids = () => entityManager.Entities.Where(entity => entity.HasComponent<CharComponent>() && entity.GetComponent<CharComponent>() == asteroidCharacter);
                 for (var i = 0; i < asteroids.Length; ++i)
                 {
                     var speed = random.Next(-5, 0);
@@ -47,8 +48,26 @@ namespace Space
                     {
                         { ShipControlOptions.None, (_) => {} },
                         { ShipControlOptions.Up, target => target.GetComponent<MovementComponent>().Move(y: -1) },
-                        { ShipControlOptions.Down, target => target.GetComponent<MovementComponent>().Move(y: 1) }
-                    }, new PlayerControlOptionsProvider()),
+                        { ShipControlOptions.Down, target => target.GetComponent<MovementComponent>().Move(y: 1) },
+                        { ShipControlOptions.Shoot, target =>
+                            {
+                                var shot = new Entity();
+                                shot.AddComponents(new CharComponent('~'),
+                                    new MovementComponent(new Vector2(target.GetComponent<MovementComponent>().Position, deltaX: 1), new Vector2(1, 0)),
+                                    new BoundsCheckComponent<MovementComponent>(movement =>
+                                        {
+                                            if (movement.Position.X >= Console.WindowWidth - 1)
+                                            {
+                                                shot.GetComponent<MovementComponent>().Move(x: Console.WindowWidth - movement.Position.X - 1);
+                                                entityManager.RemoveEntities(shot);
+                                            }
+                                        }),
+                                    new CollisionComponent((collisionTarget, check, position) => entityManager.RemoveEntities(collisionTarget, check), getAsteroids),
+                                    new RenderComponent());
+
+                                entityManager.AddEntities(shot);
+                            }}
+                    }, new AIControlOptionsProvider()),
                     new BoundsCheckComponent<MovementComponent>(movement =>
                         {
                             if (movement.Position.Y < 0)
@@ -61,11 +80,11 @@ namespace Space
                             target.GetComponent<MovementComponent>().Position = check.GetComponent<MovementComponent>().Position;
                             target.GetComponent<CharComponent>().Char = '#';
                             running = false;
-                        }, asteroids),
+                        }, getAsteroids),
                     new RenderComponent());
 
-                entityManager.AddEntity(asteroids);
-                entityManager.AddEntity(ship);
+                entityManager.AddEntities(asteroids);
+                entityManager.AddEntities(ship);
 
                 running = true;
                 var firstRun = true;

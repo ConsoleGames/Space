@@ -9,19 +9,19 @@ namespace ConsoleEngine.Components
     public class CollisionComponent : Component
     {
         private Entity targetEntity;
-        private readonly Entity[] checks;
 
         private readonly Action<Entity, Entity, Vector2> hitTarget;
+        private readonly Func<IEnumerable<Entity>> getChecks;
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="hitTarget">First parameter is the target Entity, second the Entity being checked, third the position where they collided.</param>
-        /// <param name="targets"></param>
-        public CollisionComponent(Action<Entity, Entity, Vector2> hitTarget, params Entity[] targets)
+        /// <param name="getChecks">Has to return the Entities that get checked.</param>
+        public CollisionComponent(Action<Entity, Entity, Vector2> hitTarget, Func<IEnumerable<Entity>> getChecks)
         {
             this.hitTarget = hitTarget;
-            this.checks = targets;
+            this.getChecks = getChecks;
         }
 
         public override void Setup(Entity entity)
@@ -35,7 +35,7 @@ namespace ConsoleEngine.Components
                 return;
 
             var entityMovement = targetEntity.GetComponent<MovementComponent>();
-            foreach (var check in checks)
+            foreach (var check in getChecks())
             {
                 if (!check.HasComponent<MovementComponent>())
                     continue;

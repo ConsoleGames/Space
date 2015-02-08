@@ -22,6 +22,9 @@ namespace Space
                 case ConsoleKey.DownArrow:
                     return ShipControlOptions.Down;
 
+                case ConsoleKey.Spacebar:
+                    return ShipControlOptions.Shoot;
+
                 default:
                     return ShipControlOptions.None;
             }

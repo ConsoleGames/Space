@@ -10,21 +10,67 @@ namespace ConsoleEngine
     {
         public readonly List<Entity> Entities = new List<Entity>();
 
-        public void AddEntity(params Entity[] entities)
-        {
-            foreach (var entity in entities)
+        private readonly Dictionary<Mode, List<Entity>> update = new Dictionary<Mode, List<Entity>>
             {
-                if (Entities.Contains(entity))
-                    continue;
+                { Mode.Add, new List<Entity>() },
+                { Mode.Remove, new List<Entity>() }
+            };
 
-                Entities.Add(entity);
+        private bool updating;
+
+        public void AddEntities(params Entity[] entities)
+        {
+            if (updating)
+            {
+                foreach (var entity in entities)
+                    update[Mode.Add].Add(entity);
+            }
+            else
+            {
+                foreach (var entity in entities)
+                {
+                    if (Entities.Contains(entity))
+                        continue;
+
+                    Entities.Add(entity);
+                }
+            }
+        }
+
+        public void RemoveEntities(params Entity[] entities)
+        {
+            if (updating)
+            {
+                foreach (var entity in entities)
+                    update[Mode.Remove].Add(entity);
+            }
+            else
+            {
+                foreach (var entity in entities)
+                    Entities.Remove(entity);
             }
         }
 
         public void UpdateEntities()
         {
+            updating = true;
+
             foreach (var entity in Entities)
                 entity.Update();
+
+            updating = false;
+
+            AddEntities(update[Mode.Add].ToArray());
+            update[Mode.Add].Clear();
+
+            RemoveEntities(update[Mode.Remove].ToArray());
+            update[Mode.Remove].Clear();
+        }
+
+        private enum Mode
+        {
+            Add,
+            Remove
         }
     }
 }
