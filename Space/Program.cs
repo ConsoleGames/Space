@@ -64,8 +64,8 @@ namespace Space
                         }, asteroids),
                     new RenderComponent());
 
-                entityManager.AddEntity("asteroid", asteroids); //Will be named asteroid0 to asteroid29
-                entityManager.AddEntity("ship", ship);
+                entityManager.AddEntity(asteroids);
+                entityManager.AddEntity(ship);
 
                 running = true;
                 var firstRun = true;
