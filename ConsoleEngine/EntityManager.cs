@@ -18,6 +18,11 @@ namespace ConsoleEngine
 
         private bool updating;
 
+        public void ClearEntities()
+        {
+            Entities.Clear();
+        }
+
         public void AddEntities(params Entity[] entities)
         {
             if (updating)

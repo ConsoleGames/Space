@@ -9,9 +9,9 @@ namespace ConsoleEngine.Components
     public class BoundsCheckComponent<TCheckedComponent> : Component where TCheckedComponent : Component
     {
         private Entity target;
-        private Action<TCheckedComponent> checkAndFix;
+        private Action<Entity, TCheckedComponent> checkAndFix;
 
-        public BoundsCheckComponent(Action<TCheckedComponent> checkAndFix)
+        public BoundsCheckComponent(Action<Entity, TCheckedComponent> checkAndFix)
         {
             this.checkAndFix = checkAndFix;
         }
@@ -26,7 +26,7 @@ namespace ConsoleEngine.Components
             if (!target.HasComponent<TCheckedComponent>())
                 return;
 
-            checkAndFix(target.GetComponent<TCheckedComponent>());
+            checkAndFix(target, target.GetComponent<TCheckedComponent>());
         }
     }
 }

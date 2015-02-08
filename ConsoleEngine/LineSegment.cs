@@ -11,6 +11,11 @@ namespace ConsoleEngine
         public readonly Vector2 Length;
         public readonly Vector2 Start;
 
+        public Vector2 End
+        {
+            get { return Start + Length; }
+        }
+
         public LineSegment(Vector2 start, Vector2 length)
         {
             Start = start;
@@ -25,6 +30,19 @@ namespace ConsoleEngine
             var lineObj = (LineSegment)obj;
 
             return lineObj.Start == Start && lineObj.Length == Length;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return Start.GetHashCode() * 13 + Length.GetHashCode();
+            }
+        }
+
+        public override string ToString()
+        {
+            return "Start: " + Start.ToString() + ", End: " + End.ToString();
         }
 
         public static bool Intersect(LineSegment left, LineSegment right, ref Vector2 solution)

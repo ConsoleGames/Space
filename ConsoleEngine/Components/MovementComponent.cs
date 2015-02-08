@@ -16,7 +16,12 @@ namespace ConsoleEngine.Components
 
         private LineSegment lastMove
         {
-            get { return new LineSegment(lastPosition, Position - lastPosition); }
+            get { return new LineSegment(lastPosition, Velocity); }
+        }
+
+        public Vector2 NextPosition
+        {
+            get { return Position + Velocity; }
         }
 
         public MovementComponent(Vector2 position, Vector2 velocity)
@@ -37,17 +42,7 @@ namespace ConsoleEngine.Components
         public override void Update()
         {
             lastPosition = Position;
-            Move(Velocity);
-        }
-
-        public void Move(Vector2 distance)
-        {
-            Position += distance;
-        }
-
-        public void Move(int x = 0, int y = 0)
-        {
-            Move(new Vector2(x, y));
+            Position = NextPosition;
         }
 
         public static bool HaveCollided(MovementComponent left, MovementComponent right, ref Vector2 solution)
