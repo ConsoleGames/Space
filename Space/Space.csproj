@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AIControlOptionsProvider.cs" />
+    <Compile Include="Game.cs" />
     <Compile Include="ShipControlOptions.cs" />
     <Compile Include="PlayerControlOptionsProvider.cs" />
     <Compile Include="Program.cs" />
