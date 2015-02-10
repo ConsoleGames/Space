@@ -14,7 +14,7 @@ namespace Space
         private static Random random = new Random();
 
         private static readonly EntityManager entityManager = new EntityManager();
-        private static readonly CharComponent asteroidCharacter = new CharComponent('O');
+        private static readonly string asteroidRepresentation = "O";
 
         private static bool running;
 
@@ -27,10 +27,9 @@ namespace Space
 
             while (true)
             {
-                for (var i = 0; i < Game.Asteroids; ++i)
-                    entityManager.AddEntities(makeAsteroid(new LineSegment(new Vector2(0, 0), new Vector2(Game.FieldWidth, Game.FieldHeight))));
+                #region Ship
 
-                entityManager.AddEntities(new Entity(new CharComponent('>'),
+                entityManager.AddEntities(new Entity(
                     new ControlComponent<ShipControlOptions>(new Dictionary<ShipControlOptions, Action<Entity>>
                     {
                         { ShipControlOptions.None, (ship) => ship.GetComponent<MovementComponent>().Velocity = new Vector2(0, 0) },
@@ -38,7 +37,7 @@ namespace Space
                         { ShipControlOptions.Down, ship => ship.GetComponent<MovementComponent>().Velocity = new Vector2(0, 1) },
                         { ShipControlOptions.Shoot, target =>
                             {
-                                entityManager.AddEntities(new Entity(new CharComponent('~'),
+                                entityManager.AddEntities(new Entity(
                                     new BoundsCheckComponent<MovementComponent>((shot, movement) =>
                                         {
                                             if (movement.NextPosition.X >= Game.FieldWidth)
@@ -53,7 +52,7 @@ namespace Space
                                             entityManager.RemoveEntities(shot);
                                             replaceAsteroid(check);
                                         }, getAsteroids),
-                                    new RenderComponent()));
+                                    new RenderComponent(() => "~")));
 
                                 Game.Points -= Game.Points > 100 ? 100 : Game.Points;
                                 ++Game.Shots;
@@ -70,10 +69,29 @@ namespace Space
                     new CollisionComponent((target, check, position) =>
                         {
                             target.GetComponent<MovementComponent>().Position = position;
-                            target.GetComponent<CharComponent>().Char = '#';
+                            target.GetComponent<RenderComponent>().GetRepresentation = () => "#";
                             running = false;
                         }, getAsteroids),
-                    new RenderComponent()));
+                    new RenderComponent(() => ">")));
+
+                #endregion Ship
+
+                #region Labels
+
+                entityManager.AddEntities(
+                    new Entity(
+                        new MovementComponent(new Vector2(0, Game.FieldHeight + 1)),
+                        new RenderComponent(() => Game.SeparationLine)),
+
+                    new Entity(
+                        new MovementComponent(new Vector2(0, Game.FieldHeight + 2)),
+                        new RenderComponent(() => "Points: " + Game.Points + "     Shots Fired: " + Game.Shots)));
+
+                #endregion Labels
+
+                // Asteroids
+                for (var i = 0; i < Game.Asteroids; ++i)
+                    entityManager.AddEntities(makeAsteroid(new LineSegment(new Vector2(0, 0), new Vector2(Game.FieldWidth, Game.FieldHeight))));
 
                 running = true;
                 var firstRun = true;
@@ -83,12 +101,7 @@ namespace Space
                 while (running)
                 {
                     Console.Clear();
-
                     ++Game.Points;
-                    Console.SetCursorPosition(0, Game.FieldHeight + 1);
-                    Console.Write(Game.SeparationLine);
-                    Console.SetCursorPosition(0, Game.FieldHeight + 2);
-                    Console.Write("Points: " + Game.Points + "    Shots Fired: " + Game.Shots);
 
                     entityManager.UpdateEntities();
 
@@ -119,7 +132,7 @@ namespace Space
         private static Entity makeAsteroid(LineSegment spawnArea)
         {
             var speed = random.Next(-5, 0);
-            return new Entity(asteroidCharacter,
+            return new Entity(
                 new BoundsCheckComponent<MovementComponent>((asteroid, movement) =>
                 {
                     if (movement.NextPosition.X <= 0)
@@ -129,7 +142,7 @@ namespace Space
                     }
                 }),
                 new MovementComponent(new Vector2(random.Next(spawnArea.Start.X, spawnArea.End.X + 1), random.Next(spawnArea.Start.Y, spawnArea.End.Y + 1)), new Vector2(speed < -2 ? -1 : speed, 0)),
-                new RenderComponent());
+                new RenderComponent(() => asteroidRepresentation));
         }
 
         private static void replaceAsteroid(Entity asteroid)
@@ -140,7 +153,7 @@ namespace Space
 
         private static IEnumerable<Entity> getAsteroids()
         {
-            return entityManager.Entities.Where(entity => entity.HasComponent<CharComponent>() && entity.GetComponent<CharComponent>() == asteroidCharacter);
+            return entityManager.Entities.Where(entity => entity.HasComponent<RenderComponent>() && entity.GetComponent<RenderComponent>().GetRepresentation() == asteroidRepresentation);
         }
     }
 }
