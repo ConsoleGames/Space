@@ -35,6 +35,9 @@
     <ApplicationIcon>SpaceIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ConsoleEngine">
+      <HintPath>..\..\ConsoleEngine\ConsoleEngine\bin\Release\ConsoleEngine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,15 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ConsoleEngine\ConsoleEngine.csproj">
-      <Project>{8d557981-1eb4-44e6-b9c2-0d2f44486be6}</Project>
-      <Name>ConsoleEngine</Name>
-      <EmbedAssemblyDependencies>true</EmbedAssemblyDependencies>
-      <EmbedAssembly>true</EmbedAssembly>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="SpaceIcon.ico" />
